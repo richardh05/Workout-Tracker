@@ -5,25 +5,25 @@ CREATE TABLE Day (
 
 CREATE TABLE ExerciseType (
     Id INTEGER PRIMARY KEY AUTOINCREMENT,
-    ExerciseName TEXT NOT NULL UNIQUE,
+    Name TEXT NOT NULL UNIQUE,
     Unit TEXT NOT NULL,
     Category TEXT CHECK (Category IN ('Push', 'Pull', 'Legs', 'Cardio'))
 ) STRICT;
 
-CREATE TABLE WorkoutItem (
+CREATE TABLE Workout (
     Id INTEGER PRIMARY KEY AUTOINCREMENT,
     DayId INTEGER NOT NULL,
     ExerciseTypeId INTEGER NOT NULL,
+    Note TEXT,
     FOREIGN KEY (DayId) REFERENCES Day(Id),
     FOREIGN KEY (ExerciseTypeId) REFERENCES ExerciseType(Id)
 ) STRICT;
 
 CREATE TABLE WorkoutSet (
-    WorkoutItemId INTEGER NOT NULL,
+    WorkoutId INTEGER NOT NULL,
     SetNo INTEGER NOT NULL,
     Reps INTEGER CHECK (Reps > 0),
     Value REAL CHECK (Value >= 0),
-    Note TEXT,
-    PRIMARY KEY (WorkoutItemId, SetNo),
-    FOREIGN KEY (WorkoutItemId) REFERENCES WorkoutItem(Id)
+    PRIMARY KEY (WorkoutId, SetNo),
+    FOREIGN KEY (WorkoutId) REFERENCES Workout(Id)
 ) STRICT;

@@ -20,12 +20,12 @@ erDiagram
         INTEGER WorkoutId PK
         INTEGER DayId FK
         INTEGER ExerciseId FK
+        TEXT Note
     }
-    Set {
+    WorkoutSet {
         INTEGER WorkoutId PK,FK
         INTEGER Set PK
         INTEGER Reps 
-        DECIMAL Value
-        TEXT Note
+        REAL Value
     }
 ```
