@@ -1,4 +1,6 @@
 from typing import List
+from io import StringIO
+import pandas
 
 def seperateByHeader(mdFile: str, header: str) -> List[str]:
     hBlocks: List[str] = []
@@ -36,6 +38,42 @@ def getNote(exercise: str) -> str:
         return note_line
     return ""
 
+def getMarkdownTable(markdown: str) -> str:
+    lines = markdown.splitlines()
+    table_lines = []
+    in_table = False
+
+    for line in lines:
+        line = line.strip()
+        if not in_table and line.startswith("|"):
+            in_table = True
+            table_lines.append(line)
+        elif in_table and line.startswith("|"):
+            table_lines.append(line)
+        elif in_table and not line.startswith("|") and table_lines:
+            # Stop if we were in a table and encounter a non-pipe line
+            break
+
+    if table_lines:
+        return "\n".join(table_lines)
+    else:
+        return ""
+    
+def MarkdownToDataframe(markdown: str) -> pandas.DataFrame:
+    try:
+        # Use StringIO to treat the string as a file
+        df = pandas.read_csv(
+            StringIO(markdown),
+            sep='|',
+            skipinitialspace=True,
+            header=0,
+            index_col=False
+        ).dropna(axis=1, how='all')
+        return df
+    except Exception as e:
+        print(f"Error parsing Markdown table with pandas: {e}")
+        return pandas.DataFrame()
+
 
 def extractMD(path: str) -> List[str]:
     try:
@@ -47,7 +85,9 @@ def extractMD(path: str) -> List[str]:
                  for e in exercises: 
                     exercise_type = getFirstLine(e,"## ")
                     note = getNote(e)
-                    print(note)
+                    mdTable = getMarkdownTable(e)
+                    df = MarkdownToDataframe(mdTable)
+                    print(df)
 
     except FileNotFoundError:
         return []
@@ -57,5 +97,3 @@ def extractMD(path: str) -> List[str]:
     return days
 
 myList = extractMD("/home/richard/Documents/Obsidian/Personal/02 Projects/Fitness/Exercise.md")
-#print(myList)
-#print(myList[0])
