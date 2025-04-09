@@ -18,10 +18,10 @@ def seperateByHeader(mdFile: str, header: str) -> List[str]:
     return hBlocks
 
 
-def getDate (block: str) -> str:
+def getFirstLine (block: str, header: str) -> str:
     lines = block.splitlines()
-    if lines and lines[0].startswith("# "):
-        return lines[0][2:].strip()
+    if lines and lines[0].startswith(header):
+        return lines[0][len(header):].strip()
     else:
         return ""
 
@@ -31,11 +31,11 @@ def extractMD(path: str) -> List[str]:
         with open(path, 'r', encoding='utf-8') as f:
             days = seperateByHeader(f.readlines(),"# ")
             for day in days:
-                 print(getDate(day))
+                 date = getFirstLine(day,"# ")
                  exercises = seperateByHeader(day.splitlines(),"## ")
                  for e in exercises: 
-                    print(e)
-                      
+                    exercise_type = getFirstLine(e,"## ")
+                    print(exercise_type)
 
     except FileNotFoundError:
         return []
