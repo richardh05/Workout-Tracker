@@ -68,7 +68,8 @@ def MarkdownToDataframe(markdown: str) -> pandas.DataFrame:
             skipinitialspace=True,
             header=0,
             index_col=False
-        ).dropna(axis=1, how='all')
+        ).dropna(axis=1, how='all'
+        ).iloc[1:] #remove row 0
         return df
     except Exception as e:
         print(f"Error parsing Markdown table with pandas: {e}")
