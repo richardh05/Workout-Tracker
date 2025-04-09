@@ -25,6 +25,17 @@ def getFirstLine (block: str, header: str) -> str:
     else:
         return ""
 
+def getNote(exercise: str) -> str:
+    lines = exercise.splitlines()
+    if len(lines) > 1 and lines[0].startswith("## "):
+        note_line = lines[1].strip()
+        for i in range(2, len(lines)):
+            if lines[i].startswith("|"):
+                return note_line
+        # If no '|' line is found, return the line after the header
+        return note_line
+    return ""
+
 
 def extractMD(path: str) -> List[str]:
     try:
@@ -35,7 +46,8 @@ def extractMD(path: str) -> List[str]:
                  exercises = seperateByHeader(day.splitlines(),"## ")
                  for e in exercises: 
                     exercise_type = getFirstLine(e,"## ")
-                    print(exercise_type)
+                    note = getNote(e)
+                    print(note)
 
     except FileNotFoundError:
         return []
