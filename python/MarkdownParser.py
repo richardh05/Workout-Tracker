@@ -62,16 +62,16 @@ class MarkdownParser:
         
     def MarkdownToDataframe(self, markdown: str) -> pandas.DataFrame:
         try:
-            # Use StringIO to treat the string as a file
             df = pandas.read_csv(
                 StringIO(markdown),
                 sep='|',
                 skipinitialspace=True,
                 header=0,
                 index_col=False
-            ).dropna(axis=1, how='all'
-            ).iloc[1:] #remove row 0
-            return df
+            )
+            df = df.dropna(axis=1,how='all') #remove NaN columns
+            df = df.dropna(axis=0,how='all') #remove NaN rows
+            return df.iloc[1:] #remove row 0
         except Exception as e:
             print(f"Error parsing Markdown table with pandas: {e}")
             return pandas.DataFrame()
