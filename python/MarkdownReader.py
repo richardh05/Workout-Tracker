@@ -22,18 +22,28 @@ def seperateByH1(mdFile: str) -> List[str]:
     return h1_blocks
 
 
+def getDate (block: str) -> str:
+    lines = block.splitlines()
+    if lines and lines[0].startswith("# "):
+        return lines[0][2:].strip()
+    else:
+        return ""
+
 
 def extractMD(path: str) -> List[str]:
     try:
         with open(path, 'r', encoding='utf-8') as f:
-            myList = seperateByH1(f)
+            blocks = seperateByH1(f)
+            for b in blocks:
+                 print(getDate(b))
 
     except FileNotFoundError:
         return []
     except Exception as e:
         return []
 
-    return myList
+    return blocks
 
 myList = extractMD("/home/richard/Documents/Obsidian/Personal/02 Projects/Fitness/Exercise.md")
+print(myList)
 print(myList[0])
