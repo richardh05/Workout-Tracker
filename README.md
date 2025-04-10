@@ -5,7 +5,7 @@ Simple Python and SQL code to populate my exercise database with records, and (s
 erDiagram
     ExerciseType ||--o{ Workout : includes
     Workout }o--|| Day : performed_in
-    Set }|--|| Workout : belongs_to
+    WorkoutSet }|--|| Workout : belongs_to
     Day {
         INTEGER DayId PK
         TEXT Date

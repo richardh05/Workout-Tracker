@@ -13,11 +13,27 @@ def connectDb() -> sqlite3.Connection:
         print(f"Error connecting to the database: {e}")
     return None
 
+def writeDay(date:str, conn:sqlite3.Connection):
+    cursor = conn.cursor()
+    try:
+        sql_query = "INSERT INTO Day (Date) VALUES (?)"
+        cursor.execute(sql_query, (date,))
+        conn.commit()
+        print(f"Successfully added date '{date}' to the Day table.")
+    except sqlite3.IntegrityError as e:
+        print(f"Error: Date '{date}' already exists. ({e})")
+        conn.rollback()
+    except sqlite3.Error as e:
+        print(f"Database error during insertion: {e}")
+        conn.rollback()
+
 def writeDb(f):
     mp = MarkdownParser.MarkdownParser()
+    conn = connectDb()
     days = mp.seperateByHeader(f.readlines(),"# ")
     for day in days:
         date = mp.getFirstLine(day,"# ")
+        writeDay(date,conn)
         exercises = mp.seperateByHeader(day.splitlines(),"## ")
         for e in exercises: 
             exercise_type = mp.getFirstLine(e,"## ")
