@@ -27,6 +27,23 @@ def writeDay(date:str, conn:sqlite3.Connection):
         print(f"Database error during insertion: {e}")
         conn.rollback()
 
+def getIdByUnique(conn:sqlite3.Connection, table:str, uniqueColName, uniqueVal):
+    cursor = conn.cursor()
+    try:
+        sql_query = f"SELECT Id FROM {table} WHERE {uniqueColName} = ?"
+        cursor.execute(sql_query, (uniqueVal,))
+        result = cursor.fetchone()
+        if result:
+            return result[0]
+        else:
+            return None
+    except sqlite3.Error as e:
+        print(f"Database error during Day ID retrieval: {e}")
+        return None
+
+# def writeWorkout(DayId:int, ExcersiseTypeId:int, Note:str, conn:sqlite3.Connection):
+
+
 def writeDb(f):
     mp = MarkdownParser.MarkdownParser()
     conn = connectDb()
@@ -54,3 +71,5 @@ def openMd(path: str):
 
 
 myList = openMd("/home/richard/Documents/Obsidian/Personal/02 Projects/Fitness/Exercise.md")
+conn = connectDb()
+print (getIdByUnique(conn,"Day","Date","2025-04-08"))
