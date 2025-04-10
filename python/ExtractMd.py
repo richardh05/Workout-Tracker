@@ -41,13 +41,16 @@ def getIdByUnique(conn:sqlite3.Connection, table:str, uniqueColName, uniqueVal):
         print(f"Database error during Day ID retrieval: {e}")
         return None
 
-# def writeWorkout(DayId:int, ExcersiseTypeId:int, Note:str, conn:sqlite3.Connection):
+def writeWorkoutAndSets(Date:str, ExerciseType:str, Note:str, conn:sqlite3.Connection):
+    DayId = getIdByUnique(conn,"Day","Date",Date)
+    ExerciseId = getIdByUnique(conn,"ExerciseType","Name",ExerciseType)
+
 
 
 def writeDb(f):
     mp = MarkdownParser.MarkdownParser()
     conn = connectDb()
-    days = mp.seperateByHeader(f.readlines(),"# ")
+    days = mp.days
     for day in days:
         date = mp.getFirstLine(day,"# ")
         writeDay(date,conn)
@@ -71,5 +74,3 @@ def openMd(path: str):
 
 
 myList = openMd("/home/richard/Documents/Obsidian/Personal/02 Projects/Fitness/Exercise.md")
-conn = connectDb()
-print (getIdByUnique(conn,"Day","Date","2025-04-08"))

@@ -3,7 +3,16 @@ from io import StringIO
 import pandas
 
 class MarkdownParser:
-    def seperateByHeader(self, mdFile: str, header: str) -> List[str]:
+    def __init__(self, path:str):
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                self.markdown = f.readlines()
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Error: File not found at {path}") from e
+        except Exception as e:
+            raise Exception(f"An error occurred while reading {path}: {e}") from e
+
+    def __seperateByHeader(self, mdFile: str, header: str) -> List[str]:
         hBlocks: List[str] = []
         current_block: str = ""
 
@@ -19,6 +28,10 @@ class MarkdownParser:
         if current_block:
             hBlocks.append(current_block.strip())
         return hBlocks
+    
+    @property
+    def days(self) -> str:
+        return self.__seperateByHeader(self.markdown,"# ")
 
 
     def getFirstLine (self, block: str, header: str) -> str:
