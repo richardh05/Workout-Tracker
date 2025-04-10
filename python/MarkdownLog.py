@@ -1,20 +1,20 @@
 from typing import List
 from io import StringIO
 import pandas
-import Day
-import Workout
+import DataClasses as Dc
 
 class MarkdownLog:
     def __init__(self, path:str):
         try:
             with open(path, 'r', encoding='utf-8') as f:
                 self.markdown = f.readlines()
+            f.close()
         except FileNotFoundError:
             raise FileNotFoundError(f"Error: File not found at {path}") from e
         except Exception as e:
             raise Exception(f"An error occurred while reading {path}: {e}") from e
 
-    def __seperateByHeader(self, mdFile: str, header: str) -> List[str]:
+    def _seperateByHeader(self, mdFile: str, header: str) -> List[str]:
         hBlocks: List[str] = []
         current_block: str = ""
 
@@ -31,14 +31,14 @@ class MarkdownLog:
             hBlocks.append(current_block.strip())
         return hBlocks
 
-    def getFirstLine (self, block: str, header: str) -> str:
+    def _getFirstLine (self, block: str, header: str) -> str:
         lines = block.splitlines()
         if lines and lines[0].startswith(header):
             return lines[0][len(header):].strip()
         else:
             return ""
 
-    def getNote(self, exercise: str) -> str:
+    def _getNote(self, exercise: str) -> str:
         lines = exercise.splitlines()
         if len(lines) > 1 and lines[0].startswith("## "):
             note_line = lines[1].strip()
@@ -49,7 +49,7 @@ class MarkdownLog:
             return note_line
         return ""
 
-    def getMarkdownTable(self, markdown: str) -> str:
+    def _getMarkdownTable(self, markdown: str) -> str:
         lines = markdown.splitlines()
         table_lines = []
         in_table = False
@@ -70,7 +70,7 @@ class MarkdownLog:
         else:
             return ""
         
-    def MarkdownToDataframe(self, markdown: str) -> pandas.DataFrame:
+    def _MarkdownToDataframe(self, markdown: str) -> pandas.DataFrame:
         try:
             df = pandas.read_csv(
                 StringIO(markdown),
@@ -87,20 +87,21 @@ class MarkdownLog:
             return pandas.DataFrame()
         
     @property
-    def days(self) -> List[Day.Day]:
-        days:List[Day.Day] = []
-        h1blocks = self.__seperateByHeader(self.markdown,"# ")
+    def days(self) -> List[Dc.Day]:
+        days:List[Dc.Day] = []
+        h1blocks = self._seperateByHeader(self.markdown,"# ")
         for b1 in h1blocks:
-            date = self.getFirstLine(b1,"# ")
-            h2blocks = self.__seperateByHeader(b1.splitlines(),"## ")
-            workouts:List[Workout.Workout] = []
+            date = self._getFirstLine(b1,"# ")
+            h2blocks = self._seperateByHeader(b1.splitlines(),"## ")
+            workouts:List[Dc.Workout] = []
             for b2 in h2blocks: 
-                exercise_type = self.getFirstLine(b2,"## ")
-                mdSets = self.getMarkdownTable(b2)
-                dfSets = self.MarkdownToDataframe(mdSets)
-                note = self.getNote(b2)
-                myWorkout = Workout.Workout(exercise_type, dfSets, note)
+                exercise_type = self._getFirstLine(b2,"## ")
+                mdSets = self._getMarkdownTable(b2)
+                dfSets = self._MarkdownToDataframe(mdSets)
+                note = self._getNote(b2)
+                myWorkout = Dc.Workout(exercise_type, dfSets, note)
                 workouts.append(myWorkout)
-            myDay = Day.Day(date, workouts)
+            myDay = Dc.Day(date, workouts)
             days.append(myDay)
         return days
+
