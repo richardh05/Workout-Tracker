@@ -5,4 +5,5 @@ class Day:
     def __init__(self, date:str, workouts:Optional[List[Workout.Workout]] ):
         self.date = date
         self.workouts = workouts
-        
+    def __str__(self):
+        return self.date

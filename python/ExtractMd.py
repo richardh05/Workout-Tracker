@@ -1,4 +1,4 @@
-import MarkdownParser
+import MarkdownLog
 from typing import List
 import pandas
 import sqlite3
@@ -46,31 +46,6 @@ def writeWorkoutAndSets(Date:str, ExerciseType:str, Note:str, conn:sqlite3.Conne
     ExerciseId = getIdByUnique(conn,"ExerciseType","Name",ExerciseType)
 
 
-
-def writeDb(f):
-    mp = MarkdownParser.MarkdownParser()
-    conn = connectDb()
-    days = mp.days
-    for day in days:
-        date = mp.getFirstLine(day,"# ")
-        writeDay(date,conn)
-        exercises = mp.seperateByHeader(day.splitlines(),"## ")
-        for e in exercises: 
-            exercise_type = mp.getFirstLine(e,"## ")
-            note = mp.getNote(e)
-            mdTable = mp.getMarkdownTable(e)
-            df = mp.MarkdownToDataframe(mdTable)
-            print(df)
-
-def openMd(path: str):
-    try:
-        with open(path, 'r', encoding='utf-8') as f:
-            writeDb(f)
-    except FileNotFoundError:
-        return []
-    except Exception as e:
-        return []
-
-
-
-myList = openMd("/home/richard/Documents/Obsidian/Personal/02 Projects/Fitness/Exercise.md")
+myMarkdown = MarkdownLog.MarkdownLog("/home/richard/Documents/Obsidian/Personal/02 Projects/Fitness/Exercise.md")
+for d in myMarkdown.days:
+    print(d.date)

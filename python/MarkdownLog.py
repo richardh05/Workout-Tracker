@@ -1,8 +1,10 @@
 from typing import List
 from io import StringIO
 import pandas
+import Day
+import Workout
 
-class MarkdownParser:
+class MarkdownLog:
     def __init__(self, path:str):
         try:
             with open(path, 'r', encoding='utf-8') as f:
@@ -28,11 +30,6 @@ class MarkdownParser:
         if current_block:
             hBlocks.append(current_block.strip())
         return hBlocks
-    
-    @property
-    def days(self) -> str:
-        return self.__seperateByHeader(self.markdown,"# ")
-
 
     def getFirstLine (self, block: str, header: str) -> str:
         lines = block.splitlines()
@@ -88,3 +85,22 @@ class MarkdownParser:
         except Exception as e:
             print(f"Error parsing Markdown table with pandas: {e}")
             return pandas.DataFrame()
+        
+    @property
+    def days(self) -> List[Day.Day]:
+        days:List[Day.Day] = []
+        h1blocks = self.__seperateByHeader(self.markdown,"# ")
+        for b1 in h1blocks:
+            date = self.getFirstLine(b1,"# ")
+            h2blocks = self.__seperateByHeader(b1.splitlines(),"## ")
+            workouts:List[Workout.Workout] = []
+            for b2 in h2blocks: 
+                exercise_type = self.getFirstLine(b2,"## ")
+                mdSets = self.getMarkdownTable(b2)
+                dfSets = self.MarkdownToDataframe(mdSets)
+                note = self.getNote(b2)
+                myWorkout = Workout.Workout(exercise_type, dfSets, note)
+                workouts.append(myWorkout)
+            myDay = Day.Day(date, workouts)
+            days.append(myDay)
+        return days
