@@ -30,52 +30,44 @@ class DatabaseConnector:
             else:
                 return None
         except sqlite3.Error as e:
-            print(f"Database error during Id retrieval in {table}, {uniqueColName}={uniqueVal}: {e}")
+            print(f"Database error during Id retrieval in {table} with the unique value {uniqueColName}={uniqueVal}: {e}")
             return None
 
 class DatabaseWriter(DatabaseConnector):
     def __init__(self, path):
         super().__init__(path)
 
-    def insertDay(date:str, conn:sqlite3.Connection):
+    def _insert(conn, table:str, colNames:str, values:tuple):
         cursor = conn.cursor()
         try:
-            sql_query = "INSERT INTO Day (Date) VALUES (?)"
-            cursor.execute(sql_query, (date,))
+            sql_query = f"INSERT INTO {table} ({colNames}) VALUES (?)"
+            cursor.execute(sql_query, values)
             conn.commit()
-            print(f"Successfully added date '{date}' to the Day table.")
+            print(f"Successfully added '{values}' to {table}")
         except sqlite3.IntegrityError as e:
-            print(f"Error: Date '{date}' already exists. ({e})")
+            print(f"Error: {table} with values '{values}' likely already exists. ({e})")
             conn.rollback()
         except sqlite3.Error as e:
             print(f"Database error during insertion: {e}")
-            conn.rollback()
+            conn.rollback()        
 
     def WriteExerciseTypeClass(self, x:Dc.ExerciseType):
         conn = self.connect()
-        cursor = conn.cursor()
-        try:
-            sql_query = "INSERT INTO ExerciseType (Name,Unit,Category)) VALUES (?)"
-            cursor.execute(sql_query, (x.name,x.unit,x.category))
-            conn.commit()
-            print(f"Successfully added date '{date}' to the Day table.")
-        except sqlite3.IntegrityError as e:
-            print(f"Error: Date '{date}' already exists. ({e})")
-            conn.rollback()
-        except sqlite3.Error as e:
-            print(f"Database error during insertion: {e}")
-            conn.rollback()
+        self._insert(conn, "ExerciseType", "Name,Unit,Category", (x.name,x.unit,x.category))
+        conn.close()
+    
 
-    def ExerciseTypeDialogue(conn:sqlite3.connect, exercise:str):
+    def ExerciseTypeDialogue(exercise:str):
         print(f"It seems that '{exercise}' doesn't exist in your database. If you'd like to add it, hit enter. Otherwise, type anything else to rename it")
 
 
     def writeDayClass(self, myDay:Dc.Day):
-        self.insertDay(myDay.date)
+        conn = self.connect()
+        self._insert(conn, "Day", "Date", (myDay.date,))
         DayId = self.getIdByUnique("Day","Date",myDay.date)
         for w in myDay.workouts:
             ExerciseId = self.getIdByUnique("ExerciseType","Name", w.exercise_type)
             if (ExerciseId == None):
-                self.ExerciseTypeDialogue(conn, w.exercise_type)
+                self.ExerciseTypeDialogue(w.exercise_type)
 
 
