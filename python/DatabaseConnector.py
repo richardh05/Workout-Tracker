@@ -91,19 +91,18 @@ class DatabaseWriter(DatabaseConnector):
             index = row[0]  # Index
             value = row.Value
             reps = row.Reps
-            print(f"Index: {index}, Value: {value}, Age: {reps}")
             self._insert(conn,"WorkoutSet","WorkoutId,SetNo,Value,Reps", 
                          (workoutId, index, value, reps))
         conn.close()
 
     def writeWorkoutClass(self, w:Dc.Workout, DayId:int):
         conn = self.connect()
-        ExerciseId = self.getIdByUnique("ExerciseType","Name", w.exercise_type)
+        ExerciseId = self.getIdByUnique("ExerciseType","Name", w.exerciseType)
         if (ExerciseId == None):
-            x:Dc.ExerciseType = self.ExerciseTypeDialogue(w.exercise_type)
+            x:Dc.ExerciseType = self.ExerciseTypeDialogue(w.exerciseType)
             self.WriteExerciseTypeClass(x)
-            ExerciseId = self.getIdByUnique("ExerciseType","Name", w.exercise_type)
-        self._insert(conn, "Workout", "DayId,ExerciseTypeId,Note", (DayId,w.exercise_type,w.note))
+            ExerciseId = self.getIdByUnique("ExerciseType","Name", w.exerciseType)
+        self._insert(conn, "Workout", "DayId,ExerciseTypeId,Note", (DayId,ExerciseId,w.note))
         self.writeWorkoutSets(w.sets, ExerciseId)
         conn.close()
 

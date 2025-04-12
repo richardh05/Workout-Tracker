@@ -1,23 +1,24 @@
 from typing import List, Optional
-import pandas
+from dataclasses import dataclass
+import pandas as pd
 
+@dataclass
 class ExerciseType:
-    def __init__(self, name:str, unit:str, category:str):
-        self.name = name
-        self.unit = unit
-        self.category = category
+    name:str
+    unit:str
+    category:str
 
+@dataclass
 class Workout:
-    def __init__(self, exerciseType:str, sets:pandas.DataFrame, note:Optional[str] = None):
-        self.exercise_type = exerciseType
-        self.sets = sets
-        self.note = note
+    exerciseType:int
+    sets:pd.DataFrame
+    note:Optional[str]
     def __str__(self):
-        return self.exercise_type
+        return self.exerciseType
 
+@dataclass
 class Day:
-    def __init__(self, date:str, workouts:Optional[List[Workout]] ):
-        self.date = date
-        self.workouts = workouts
+    date:str
+    workouts:Optional[List[Workout]]
     def __str__(self):
         return self.date
