@@ -24,7 +24,7 @@ erDiagram
     }
     WorkoutSet {
         INTEGER WorkoutId PK,FK
-        INTEGER Set PK
+        INTEGER SetNo PK
         INTEGER Reps 
         REAL Value
     }

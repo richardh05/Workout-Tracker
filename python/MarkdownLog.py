@@ -81,7 +81,11 @@ class MarkdownLog:
             )
             df = df.dropna(axis=1,how='all') #remove NaN columns
             df = df.dropna(axis=0,how='all') #remove NaN rows
-            return df.iloc[1:] #remove row 0
+            df = df.iloc[1:] #remove row 0
+            df.columns = df.columns.str.strip()  # Remove leading/trailing whitespace from column names
+            df['Reps'] = df['Reps'].astype(int)
+            df['Value'] = df['Value'].astype(float)
+            return df
         except Exception as e:
             print(f"Error parsing Markdown table with pandas: {e}")
             return pandas.DataFrame()

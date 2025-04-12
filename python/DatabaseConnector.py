@@ -51,12 +51,6 @@ class DatabaseWriter(DatabaseConnector):
             print(f"Database error during insertion: {e}")
             conn.rollback()        
 
-    def WriteExerciseTypeClass(self, x:Dc.ExerciseType):
-        conn = self.connect()
-        self._insert(conn, "ExerciseType", "Name,Unit,Category", (x.name,x.unit,x.category))
-        conn.close()
-    
-
     def ExerciseTypeDialogue(exercise:str) -> Dc.ExerciseType:
         print(f"It seems that '{exercise}' doesn't exist in your database. If you'd like to add it, hit enter. Otherwise, type anything else to rename it.")
         user_input = input("> ").strip()
@@ -77,17 +71,40 @@ class DatabaseWriter(DatabaseConnector):
             xUnit = input("> ").strip()
         x = Dc.ExerciseType(xName,xUnit,xCategory)
         return x
-
-    def writeDayClass(self, myDay:Dc.Day):
+    
+    def WriteExerciseTypeClass(self, x:Dc.ExerciseType):
         conn = self.connect()
-        self._insert(conn, "Day", "Date", (myDay.date,))
-        DayId = self.getIdByUnique("Day","Date",myDay.date)
-        for w in myDay.workouts:
+        self._insert(conn, "ExerciseType", "Name,Unit,Category", (x.name,x.unit,x.category))
+        conn.close()
+
+    def writeWorkoutSets(self, s:pandas.DataFrame, workoutId:int):
+        conn = self.connect()
+        for row in s.itertuples():
+            index = row[0]  # Index
+            value = row.Value
+            reps = row.Reps
+            print(f"Index: {index}, Value: {value}, Age: {reps}")
+            self._insert(conn,"WorkoutSet","WorkoutId,SetNo,Value,Reps", 
+                         (workoutId, index, value, reps))
+        conn.close()
+
+    def writeWorkoutClass(self, w:Dc.Workout, DayId:int):
+        conn = self.connect()
+        ExerciseId = self.getIdByUnique("ExerciseType","Name", w.exercise_type)
+        if (ExerciseId == None):
+            x:Dc.ExerciseType = self.ExerciseTypeDialogue(w.exercise_type)
+            self.WriteExerciseTypeClass(x)
             ExerciseId = self.getIdByUnique("ExerciseType","Name", w.exercise_type)
-            if (ExerciseId == None):
-                x:Dc.ExerciseType = self.ExerciseTypeDialogue(w.exercise_type)
-                self.WriteExerciseTypeClass(x)
-                ExerciseId = self.getIdByUnique("ExerciseType","Name", w.exercise_type)
-            #self._insert(conn, "Workout", "")
+        self._insert(conn, "Workout", "DayId,ExerciseTypeId,Note", (DayId,w.exercise_type,w.note))
+        self.writeWorkoutSets(w.sets, ExerciseId)
+        conn.close()
+
+    def writeDayClass(self, d:Dc.Day):
+        conn = self.connect()
+        self._insert(conn, "Day", "Date", (d.date,))
+        DayId = self.getIdByUnique("Day","Date",d.date)
+        for w in d.workouts:
+            self.writeWorkoutClass(w, DayId)
+        conn.close()
 
 
