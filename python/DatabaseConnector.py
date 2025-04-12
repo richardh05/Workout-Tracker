@@ -4,8 +4,6 @@ import pandas
 import sqlite3
 import DataClasses as Dc
 
-SQLitePath:str = "/home/richard/Documents/gym"
-
 class DatabaseConnector:
     def __init__(self, path:str):
         self.path = path
@@ -19,7 +17,7 @@ class DatabaseConnector:
             return None
         
     def getIdByUnique(self, table:str, uniqueColName:str, uniqueVal):
-        conn = self.connect
+        conn = self.connect()
         cursor = conn.cursor()
         try:
             sql_query = f"SELECT Id FROM {table} WHERE {uniqueColName} = ?"
@@ -37,38 +35,48 @@ class DatabaseWriter(DatabaseConnector):
     def __init__(self, path):
         super().__init__(path)
 
-    def _insert(conn, table:str, colNames:str, values:tuple):
+    def _insert(self, conn, table:str, colNames:str, values:tuple):
         cursor = conn.cursor()
         try:
-            sql_query = f"INSERT INTO {table} ({colNames}) VALUES (?)"
+            # Split the colNames string into a list of individual column names
+            columns = [col.strip() for col in colNames.split(',')]
+            num_columns = len(columns)
+
+            # Create the appropriate number of placeholders (?, ?, ...)
+            placeholders = ', '.join(['?'] * num_columns)
+
+            # Construct the SQL query with the dynamic placeholders
+            sql_query = f"INSERT INTO {table} ({', '.join(columns)}) VALUES ({placeholders})"
+
+            # Execute the query with the tuple of values
             cursor.execute(sql_query, values)
             conn.commit()
-            print(f"Successfully added '{values}' to {table}")
+            print(f"Successfully added '{values}' to {table} (columns: {', '.join(columns)})")
         except sqlite3.IntegrityError as e:
             print(f"Error: {table} with values '{values}' likely already exists. ({e})")
             conn.rollback()
         except sqlite3.Error as e:
-            print(f"Database error during insertion: {e}")
+            print(f"Database error during {table} insertion: {e}")
             conn.rollback()        
 
-    def ExerciseTypeDialogue(exercise:str) -> Dc.ExerciseType:
+    def ExerciseTypeDialogue(self, exercise:str) -> Dc.ExerciseType:
         print(f"It seems that '{exercise}' doesn't exist in your database. If you'd like to add it, hit enter. Otherwise, type anything else to rename it.")
         user_input = input("> ").strip()
-        xName = str
+        xName:str
         if not user_input:  # User hit enter (empty string)
             print(f"Adding '{exercise}' to the database.")
             xName = exercise
         else:
             print(f"Renaming '{exercise}' to '{user_input}'.")
             xName = user_input
-        xUnit = str
+        xUnit:str = None
         while not xUnit:
             print(f"Please enter a unit (Kg, Km, etc) that your exercise will be measured with. If this doesn't apply, enter 'N/A'.")
             xUnit = input("> ").strip()
-        xCategory = str
+        xCategory:str = None
         while not xCategory:
             print(f"Finally, please specify the category (Push, Pull, Legs or Cardio).")
-            xUnit = input("> ").strip()
+            xCategory = input("> ").strip()
         x = Dc.ExerciseType(xName,xUnit,xCategory)
         return x
     
@@ -102,9 +110,9 @@ class DatabaseWriter(DatabaseConnector):
     def writeDayClass(self, d:Dc.Day):
         conn = self.connect()
         self._insert(conn, "Day", "Date", (d.date,))
+        conn.close()
         DayId = self.getIdByUnique("Day","Date",d.date)
         for w in d.workouts:
             self.writeWorkoutClass(w, DayId)
-        conn.close()
 
 

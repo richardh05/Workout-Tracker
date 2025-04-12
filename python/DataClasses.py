@@ -2,7 +2,7 @@ from typing import List, Optional
 import pandas
 
 class ExerciseType:
-    def _init__(self, name:str, unit:str, category:str):
+    def __init__(self, name:str, unit:str, category:str):
         self.name = name
         self.unit = unit
         self.category = category
