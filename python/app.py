@@ -64,4 +64,3 @@ def update_graph(selected_exercise):
 
 if __name__ == '__main__':
     app.run_server(debug=True)
-py
