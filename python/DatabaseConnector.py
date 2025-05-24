@@ -101,7 +101,7 @@ class DatabaseWriter(DatabaseConnector):
         if (ExerciseId == None):
             x:Dc.ExerciseType = self.ExerciseTypeDialogue(w.exerciseType)
             self.WriteExerciseTypeClass(x)
-            ExerciseId = self.getIdByUnique("ExerciseType","Name", w.exerciseType)
+            ExerciseId = self.getIdByUnique("ExerciseType","Name", x.name)
         self._insert(conn, "Workout", "DayId,ExerciseTypeId,Note", (DayId,ExerciseId,w.note))
         self.writeWorkoutSets(w.sets, ExerciseId)
         conn.close()
