@@ -4,21 +4,24 @@ import pandas as pd
 
 @dataclass
 class ExerciseType:
+    id:Optional[int]
     name:str
     unit:str
     category:str
 
 @dataclass
 class Workout:
-    exerciseType:int
+    id:Optional[int]
+    exerciseType:ExerciseType
     sets:pd.DataFrame
     note:Optional[str]
     def __str__(self):
-        return self.exerciseType
+        return self.note
 
 @dataclass
 class Day:
+    id:Optional[int]
     date:str
-    workouts:Optional[List[Workout]]
+    workouts:List[Workout]
     def __str__(self):
         return self.date

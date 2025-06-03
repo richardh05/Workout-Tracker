@@ -8,13 +8,12 @@ class MarkdownLog:
         try:
             with open(path, 'r', encoding='utf-8') as f:
                 self.markdown = f.readlines()
-            f.close()
-        except FileNotFoundError:
+        except FileNotFoundError as e:
             raise FileNotFoundError(f"Error: File not found at {path}") from e
         except Exception as e:
             raise Exception(f"An error occurred while reading {path}: {e}") from e
 
-    def _seperateByHeader(self, mdFile: str, header: str) -> List[str]:
+    def _seperateByHeader(self, mdFile: List[str], header: str) -> List[str]:
         hBlocks: List[str] = []
         current_block: str = ""
 
@@ -99,13 +98,14 @@ class MarkdownLog:
             h2blocks = self._seperateByHeader(b1.splitlines(),"## ")
             workouts:List[Dc.Workout] = []
             for b2 in h2blocks: 
-                exercise_type = self._getFirstLine(b2,"## ")
+                exerciseTypeName = self._getFirstLine(b2,"## ")
                 mdSets = self._getMarkdownTable(b2)
                 dfSets = self._MarkdownToDataframe(mdSets)
                 note = self._getNote(b2)
-                myWorkout = Dc.Workout(exercise_type, dfSets, note)
+                exerciseType = Dc.ExerciseType(None,exerciseTypeName,"","")
+                myWorkout = Dc.Workout(None,exerciseType, dfSets, note)
                 workouts.append(myWorkout)
-            myDay = Dc.Day(date, workouts)
+            myDay = Dc.Day(None,date, workouts)
             days.append(myDay)
         return days
 
