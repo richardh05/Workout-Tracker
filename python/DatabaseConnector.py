@@ -17,19 +17,22 @@ class DatabaseConnector:
             print(f"Error connecting to the database: {e}")
             sys.exit()
         
-    def getIdByUnique(self, table:str, uniqueColName:str, uniqueVal):
+    def getIdByUnique(self, table:str, unique_cols_and_vals: dict):
         conn = self.connect()
         cursor = conn.cursor()
         try:
-            sql_query = f"SELECT Id FROM {table} WHERE {uniqueColName} = ?"
-            cursor.execute(sql_query, (uniqueVal,))
+             # Construct WHERE clause for multiple columns
+            where_clauses = [f"{col} = ?" for col in unique_cols_and_vals.keys()]
+            sql_query = f"SELECT Id FROM {table} WHERE {' AND '.join(where_clauses)}"
+            values = tuple(unique_cols_and_vals.values())
+            cursor.execute(sql_query, values)
             result = cursor.fetchone()
             if result:
                 return result[0]
             else:
                 return None
         except sqlite3.Error as e:
-            print(f"Database error during Id retrieval in {table} with the unique value {uniqueColName}={uniqueVal}: {e}")
+            print(f"Database error during Id retrieval in {table} with unique values {unique_cols_and_vals}: {e}")
             return None
         
     def getExerciseTypeByName(self, name:str) -> Optional[Dc.ExerciseType]:
@@ -133,17 +136,18 @@ class DatabaseWriter(DatabaseConnector):
     def writeWorkoutClass(self, w:Dc.Workout, DayId:int):
         conn = self.connect()
         # exercise types ripped from markdown won't have id, unit or category
-        w.exerciseType.id = self.getIdByUnique("ExerciseType","Name", w.exerciseType.name)
+        w.exerciseType.id = self.getIdByUnique("ExerciseType", dict(Name = w.exerciseType.name))
         checkedExerciseType = self.getExerciseTypeByName(w.exerciseType.name)
         print(checkedExerciseType)
         print(w.exerciseType.name)
         if (checkedExerciseType == None):
             checkedExerciseType = self.ExerciseTypeDialogue(w.exerciseType.name)
             self.WriteExerciseTypeClass(checkedExerciseType)
-            checkedExerciseType.id = self.getIdByUnique("ExerciseType","Name", checkedExerciseType.name)
+            checkedExerciseType.id = self.getIdByUnique("ExerciseType",dict (Name = checkedExerciseType.name))
         self._insert(conn, "Workout", "DayId,ExerciseTypeId,Note", (DayId,checkedExerciseType.id,w.note))
 
-        w.id = self.getIdByUnique("Workout","DayId,ExerciseTypeId,Note",(DayId,w.exerciseType.id,w.note))
+        w.id = self.getIdByUnique("Workout", dict(DayId=DayId, ExerciseTypeId=w.exerciseType.id, Note=w.note))
+        print(w)
         if w.id != None:
             self.writeWorkoutSets(w.sets, w.id)
         else:
@@ -155,7 +159,7 @@ class DatabaseWriter(DatabaseConnector):
         conn = self.connect()
         self._insert(conn, "Day", "Date", (d.date,))
         conn.close()
-        d.id = self.getIdByUnique("Day","Date",d.date)
+        d.id = self.getIdByUnique("Day",dict(Date=d.date))
         if d.id == None:
             print("Error: writeDayClass() is not inserting new Days correctly, as the Id lookup fails")
             sys.exit()
