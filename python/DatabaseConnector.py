@@ -1,5 +1,6 @@
 import MarkdownLog
-from typing import List
+import sys
+from typing import List, Optional
 import pandas
 import sqlite3
 import DataClasses as Dc
@@ -14,22 +15,59 @@ class DatabaseConnector:
             return conn
         except sqlite3.Error as e:
             print(f"Error connecting to the database: {e}")
-            return None
+            sys.exit()
         
-    def getIdByUnique(self, table:str, uniqueColName:str, uniqueVal):
+    def getIdByUnique(self, table:str, unique_cols_and_vals: dict):
         conn = self.connect()
         cursor = conn.cursor()
         try:
-            sql_query = f"SELECT Id FROM {table} WHERE {uniqueColName} = ?"
-            cursor.execute(sql_query, (uniqueVal,))
+             # Construct WHERE clause for multiple columns
+            where_clauses = [f"{col} = ?" for col in unique_cols_and_vals.keys()]
+            sql_query = f"SELECT Id FROM {table} WHERE {' AND '.join(where_clauses)}"
+            values = tuple(unique_cols_and_vals.values())
+            cursor.execute(sql_query, values)
             result = cursor.fetchone()
             if result:
                 return result[0]
             else:
                 return None
         except sqlite3.Error as e:
-            print(f"Database error during Id retrieval in {table} with the unique value {uniqueColName}={uniqueVal}: {e}")
+            print(f"Database error during Id retrieval in {table} with unique values {unique_cols_and_vals}: {e}")
             return None
+        
+    def getExerciseTypeByName(self, name:str) -> Optional[Dc.ExerciseType]:
+        conn = self.connect()
+        cursor = conn.cursor()
+        try:
+            sql_query = f"SELECT Id, Name, Unit, Category FROM ExerciseType WHERE Name = ?"
+            cursor.execute(sql_query, (name,))
+            row = cursor.fetchone()
+            if row:
+                result = Dc.ExerciseType(row[0],row[1],row[2],row[3])
+                return result
+            else:
+                return None
+        except sqlite3.Error as e:
+            print(f"Database error during ExerciseType retrieval with the name {name}: {e}")
+            return None
+        
+    def readExerciseTypes(self) -> dict[int, Dc.ExerciseType]:
+        conn = self.connect()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("SELECT Id, Name, Unit, Category FROM ExerciseType")
+            rows = cursor.fetchall()
+            # Create a dictionary keyed by ExerciseID
+            result = {
+                id: Dc.ExerciseType(id, name, unit, category)
+                for id, name, unit, category in rows
+            }
+            return result
+        except sqlite3.Error as e:
+            print(f"Database error while reading ExerciseTypes: {e}")
+            return {}
+        finally:
+            conn.close()
 
 class DatabaseWriter(DatabaseConnector):
     def __init__(self, path):
@@ -69,15 +107,15 @@ class DatabaseWriter(DatabaseConnector):
         else:
             print(f"Renaming '{exercise}' to '{user_input}'.")
             xName = user_input
-        xUnit:str = None
+        xUnit:str = ""
         while not xUnit:
             print(f"Please enter a unit (Kg, Km, etc) that your exercise will be measured with. If this doesn't apply, enter 'N/A'.")
             xUnit = input("> ").strip()
-        xCategory:str = None
+        xCategory:str = ""
         while not xCategory:
             print(f"Finally, please specify the category (Push, Pull, Legs or Cardio).")
             xCategory = input("> ").strip()
-        x = Dc.ExerciseType(xName,xUnit,xCategory)
+        x = Dc.ExerciseType(None,xName,xUnit,xCategory)
         return x
     
     def WriteExerciseTypeClass(self, x:Dc.ExerciseType):
@@ -97,21 +135,33 @@ class DatabaseWriter(DatabaseConnector):
 
     def writeWorkoutClass(self, w:Dc.Workout, DayId:int):
         conn = self.connect()
-        ExerciseId = self.getIdByUnique("ExerciseType","Name", w.exerciseType)
-        if (ExerciseId == None):
-            x:Dc.ExerciseType = self.ExerciseTypeDialogue(w.exerciseType)
-            self.WriteExerciseTypeClass(x)
-            ExerciseId = self.getIdByUnique("ExerciseType","Name", x.name)
-        self._insert(conn, "Workout", "DayId,ExerciseTypeId,Note", (DayId,ExerciseId,w.note))
-        self.writeWorkoutSets(w.sets, ExerciseId)
+        # exercise types ripped from markdown won't have id, unit or category
+        w.exerciseType.id = self.getIdByUnique("ExerciseType", dict(Name = w.exerciseType.name))
+        checkedExerciseType = self.getExerciseTypeByName(w.exerciseType.name)
+        print(checkedExerciseType)
+        print(w.exerciseType.name)
+        if (checkedExerciseType == None):
+            checkedExerciseType = self.ExerciseTypeDialogue(w.exerciseType.name)
+            self.WriteExerciseTypeClass(checkedExerciseType)
+            checkedExerciseType.id = self.getIdByUnique("ExerciseType",dict (Name = checkedExerciseType.name))
+        self._insert(conn, "Workout", "DayId,ExerciseTypeId,Note", (DayId,checkedExerciseType.id,w.note))
+
+        w.id = self.getIdByUnique("Workout", dict(DayId=DayId, ExerciseTypeId=w.exerciseType.id, Note=w.note))
+        print(w)
+        if w.id != None:
+            self.writeWorkoutSets(w.sets, w.id)
+        else:
+            print("Error: writeWorkoutClass() wants to write WorkoutSets with no Id!")
+            sys.exit()
         conn.close()
 
     def writeDayClass(self, d:Dc.Day):
         conn = self.connect()
         self._insert(conn, "Day", "Date", (d.date,))
         conn.close()
-        DayId = self.getIdByUnique("Day","Date",d.date)
+        d.id = self.getIdByUnique("Day",dict(Date=d.date))
+        if d.id == None:
+            print("Error: writeDayClass() is not inserting new Days correctly, as the Id lookup fails")
+            sys.exit()
         for w in d.workouts:
-            self.writeWorkoutClass(w, DayId)
-
-
+            self.writeWorkoutClass(w, d.id)
