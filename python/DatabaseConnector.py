@@ -1,4 +1,3 @@
-import MarkdownLog
 import sys
 from typing import List, Optional
 import pandas

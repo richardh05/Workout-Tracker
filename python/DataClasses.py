@@ -16,7 +16,7 @@ class Workout:
     sets:pd.DataFrame
     note:Optional[str]
     def __str__(self):
-        return self.note
+        return (self.exerciseType.name + ":\n" + self.sets.to_string())
 
 @dataclass
 class Day:
