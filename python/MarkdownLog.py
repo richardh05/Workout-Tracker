@@ -103,7 +103,7 @@ class MarkdownLog:
                 dfSets = self._MarkdownToDataframe(mdSets)
                 note = self._getNote(b2)
                 exerciseType = Dc.ExerciseType(None,exerciseTypeName,"","")
-                myWorkout = Dc.Workout(None,exerciseType, dfSets, note)
+                myWorkout: Dc.Workout = Dc.Workout(None,exerciseType, dfSets, note)
                 workouts.append(myWorkout)
             myDay = Dc.Day(None,date, workouts)
             days.append(myDay)
