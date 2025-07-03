@@ -2,7 +2,7 @@ import pandas as pd
 import plotly.express as px
 from dash import Dash, dcc, html, Input, Output
 
-def run_dashboard(database_path: str, host: str = "127.0.0.1", port: int = 8000, debug: bool = False):
+def run_dashboard(database_path:str, host:str, port:int , debug:bool):
     """
     Initializes and runs the Dash web application.
 
@@ -71,6 +71,5 @@ def run_dashboard(database_path: str, host: str = "127.0.0.1", port: int = 8000,
                     labels={'Max1RM': 'Estimated 1RM (kg)'})
         fig.update_layout(xaxis_title="Date", yaxis_title="1RM (kg)")
         return fig
-
-    app.run(debug=True)
+    app.run(host=host, port=port, debug=debug)
 
