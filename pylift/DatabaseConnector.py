@@ -2,7 +2,7 @@ import sys
 from typing import List, Optional
 import pandas
 import sqlite3
-import DataClasses as Dc
+import DataClasses as c
 
 class DatabaseConnector:
     def __init__(self, path:str):
@@ -34,7 +34,7 @@ class DatabaseConnector:
             print(f"Database error during Id retrieval in {table} with unique values {unique_cols_and_vals}: {e}")
             return None
         
-    def getExerciseTypeByName(self, name:str) -> Optional[Dc.ExerciseType]:
+    def getExerciseTypeByName(self, name:str) -> Optional[c.ExerciseType]:
         conn = self.connect()
         cursor = conn.cursor()
         try:
@@ -42,7 +42,7 @@ class DatabaseConnector:
             cursor.execute(sql_query, (name,))
             row = cursor.fetchone()
             if row:
-                result = Dc.ExerciseType(row[0],row[1],row[2],row[3])
+                result = c.ExerciseType(row[0],row[1],row[2],row[3])
                 return result
             else:
                 return None
@@ -50,7 +50,7 @@ class DatabaseConnector:
             print(f"Database error during ExerciseType retrieval with the name {name}: {e}")
             return None
         
-    def readExerciseTypes(self) -> dict[int, Dc.ExerciseType]:
+    def readExerciseTypes(self) -> dict[int, c.ExerciseType]:
         conn = self.connect()
         cursor = conn.cursor()
         try:
@@ -58,7 +58,7 @@ class DatabaseConnector:
             rows = cursor.fetchall()
             # Create a dictionary keyed by ExerciseID
             result = {
-                id: Dc.ExerciseType(id, name, unit, category)
+                id: c.ExerciseType(id, name, unit, category)
                 for id, name, unit, category in rows
             }
             return result
@@ -96,7 +96,7 @@ class DatabaseWriter(DatabaseConnector):
             print(f"Database error during {table} insertion: {e}")
             conn.rollback()        
 
-    def ExerciseTypeDialogue(self, exercise:str) -> Dc.ExerciseType:
+    def ExerciseTypeDialogue(self, exercise:str) -> c.ExerciseType:
         print(f"It seems that '{exercise}' doesn't exist in your database. If you'd like to add it, hit enter. Otherwise, type anything else to rename it.")
         user_input = input("> ").strip()
         xName:str
@@ -114,10 +114,10 @@ class DatabaseWriter(DatabaseConnector):
         while not xCategory:
             print(f"Finally, please specify the category (Push, Pull, Legs or Cardio).")
             xCategory = input("> ").strip()
-        x = Dc.ExerciseType(None,xName,xUnit,xCategory)
+        x = c.ExerciseType(None,xName,xUnit,xCategory)
         return x
     
-    def WriteExerciseTypeClass(self, x:Dc.ExerciseType):
+    def WriteExerciseTypeClass(self, x:c.ExerciseType):
         conn = self.connect()
         self._insert(conn, "ExerciseType", "Name,Unit,Category", (x.name,x.unit,x.category))
         conn.close()
@@ -132,7 +132,7 @@ class DatabaseWriter(DatabaseConnector):
                          (workoutId, index, value, reps))
         conn.close()
 
-    def writeWorkoutClass(self, w:Dc.Workout, DayId:int):
+    def writeWorkoutClass(self, w:c.Workout, DayId:int):
         conn = self.connect()
         # exercise types ripped from markdown won't have id, unit or category
         w.exerciseType.id = self.getIdByUnique("ExerciseType", dict(Name = w.exerciseType.name))
@@ -154,7 +154,7 @@ class DatabaseWriter(DatabaseConnector):
             sys.exit()
         conn.close()
 
-    def writeDayClass(self, d:Dc.Day):
+    def writeDayClass(self, d:c.Day):
         conn = self.connect()
         self._insert(conn, "Day", "Date", (d.date,))
         conn.close()

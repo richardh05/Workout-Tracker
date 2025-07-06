@@ -1,7 +1,7 @@
 from typing import List
 from io import StringIO
 import pandas
-import DataClasses as Dc
+import DataClasses as c
 
 class MarkdownLog:
     def __init__(self, path:str):
@@ -89,23 +89,43 @@ class MarkdownLog:
             print(f"Error parsing Markdown table with pandas: {e}")
             return pandas.DataFrame()
         
+    def _getSets(self, df: pandas.DataFrame) -> List[c.Set]:
+        try:
+            list: List[c.Set] = []
+            if df.empty: return []
+            for index, row in df.iterrows():
+                reps = row['Reps']
+                value = row['Value']
+                mySet = c.Set(reps, value)
+                list.append(mySet)
+            return list
+        except Exception as e:
+            print(f"Error creating Set from DataFrame: {e}")
+            return []
+
+        
     @property
-    def days(self) -> List[Dc.Day]:
-        days:List[Dc.Day] = []
+    def days(self) -> List[c.Day]:
+        days:List[c.Day] = []
         h1blocks = self._seperateByHeader(self.markdown,"# ")
         for b1 in h1blocks:
-            date = self._getFirstLine(b1,"# ")
+            date_str = self._getFirstLine(b1,"# ")
+            try:
+                date = pandas.to_datetime(date_str).date()
+            except ValueError as e:
+                print(f"Error parsing date '{date_str}': {e}")
+                continue
             h2blocks = self._seperateByHeader(b1.splitlines(),"## ")
-            workouts:List[Dc.Workout] = []
+            workouts:List[c.Workout] = []
             for b2 in h2blocks: 
                 exerciseTypeName = self._getFirstLine(b2,"## ")
                 mdSets = self._getMarkdownTable(b2)
                 dfSets = self._MarkdownToDataframe(mdSets)
+                sets = self._getSets(dfSets)
                 note = self._getNote(b2)
-                exerciseType = Dc.ExerciseType(None,exerciseTypeName,"","")
-                myWorkout: Dc.Workout = Dc.Workout(None,exerciseType, dfSets, note)
+                myWorkout: c.Workout = c.Workout(None,exerciseTypeName, sets, note)
                 workouts.append(myWorkout)
-            myDay = Dc.Day(None,date, workouts)
+            myDay = c.Day(None,date, workouts)
             days.append(myDay)
         return days
 
