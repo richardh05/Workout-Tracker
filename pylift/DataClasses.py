@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from typing import List, Optional
 from dataclasses import dataclass
 from pathlib import Path
+from pandas import DataFrame
 import json
-import pandas as pd
 import datetime
 
 # Data Classes for Workout Tracker
@@ -19,7 +19,7 @@ class Savable(ABC):
         pass
 
     def write(self, filepath: Path) -> None:
-        data = self.to_dict
+        data: dict = self.to_dict()
         with open(filepath, 'w') as f:
             json.dump(data, f, indent=4)
 
@@ -89,7 +89,7 @@ class Workout:
     def to_dict(self) -> dict:
         return {
         "exerciseType": self.exerciseType,
-        "sets": [s.to_dict for s in self.sets],
+        "sets": [s.to_dict() for s in self.sets],
         "note": self.note
         }
     
@@ -115,7 +115,7 @@ class Day(Savable):
     def to_dict(self) -> dict:
         return {
             "date": self.date_str,
-            "workouts": [w.to_dict for w in self.workouts]
+            "workouts": [w.to_dict() for w in self.workouts]
         }
     
     @classmethod
@@ -133,3 +133,19 @@ class Day(Savable):
         with open(filepath, 'r') as f:
             data:dict = json.load(f)
         return cls.from_dict(data)
+    
+    def to_dataframe(self, types:List[ExerciseType]) -> DataFrame:
+        data = []
+        for workout in self.workouts:
+            ex = next((et for et in types if et.name == "Squat"))
+            for s in workout.sets:
+                data.append({
+                    "date": self.date_str,
+                    "exercise": workout.exerciseType,
+                    "category": ex.category,
+                    "reps": s.reps,
+                    "value": s.value,
+                    "unit": ex.unit,
+                    "note": workout.note
+                })
+        return DataFrame(data)
