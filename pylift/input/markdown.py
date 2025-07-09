@@ -1,19 +1,24 @@
 from typing import List
 from io import StringIO
-import pandas
-import DataClasses as c
+from pandas import DataFrame, read_csv, to_datetime
+from pathlib import Path
+from pylift.classes.exercise_type import ExerciseType
+from pylift.classes.set import Set
+from pylift.classes.workout import Workout
+from pylift.classes.day import Day  
 
-class MarkdownLog:
-    def __init__(self, path:str):
+def read_markdown(path: Path) -> List[Day]:
+    def _init(path:str) -> List[str]:
         try:
             with open(path, 'r', encoding='utf-8') as f:
-                self.markdown = f.readlines()
+                markdown = f.readlines()
+                return markdown
         except FileNotFoundError as e:
             raise FileNotFoundError(f"Error: File not found at {path}") from e
         except Exception as e:
             raise Exception(f"An error occurred while reading {path}: {e}") from e
 
-    def _seperateByHeader(self, mdFile: List[str], header: str) -> List[str]:
+    def _seperateByHeader(mdFile: List[str], header: str) -> List[str]:
         hBlocks: List[str] = []
         current_block: str = ""
 
@@ -30,14 +35,14 @@ class MarkdownLog:
             hBlocks.append(current_block.strip())
         return hBlocks
 
-    def _getFirstLine (self, block: str, header: str) -> str:
+    def _getFirstLine (block: str, header: str) -> str:
         lines = block.splitlines()
         if lines and lines[0].startswith(header):
             return lines[0][len(header):].strip()
         else:
             return ""
 
-    def _getNote(self, exercise: str) -> str:
+    def _getNote(exercise: str) -> str:
         lines = exercise.splitlines()
         if len(lines) > 1 and lines[0].startswith("## "):
             note_line = lines[1].strip()
@@ -48,7 +53,7 @@ class MarkdownLog:
             return note_line
         return ""
 
-    def _getMarkdownTable(self, markdown: str) -> str:
+    def _getMarkdownTable(markdown: str) -> str:
         lines = markdown.splitlines()
         table_lines = []
         in_table = False
@@ -69,9 +74,9 @@ class MarkdownLog:
         else:
             return ""
         
-    def _MarkdownToDataframe(self, markdown: str) -> pandas.DataFrame:
+    def _MarkdownToDataframe(markdown: str) -> DataFrame:
         try:
-            df = pandas.read_csv(
+            df = read_csv(
                 StringIO(markdown),
                 sep='|',
                 skipinitialspace=True,
@@ -87,45 +92,44 @@ class MarkdownLog:
             return df
         except Exception as e:
             print(f"Error parsing Markdown table with pandas: {e}")
-            return pandas.DataFrame()
+            return DataFrame()
         
-    def _getSets(self, df: pandas.DataFrame) -> List[c.Set]:
+    def _getSets(df: DataFrame) -> List[Set]:
         try:
-            list: List[c.Set] = []
+            list: List[Set] = []
             if df.empty: return []
             for index, row in df.iterrows():
                 reps = row['Reps']
                 value = row['Value']
-                mySet = c.Set(reps, value)
+                mySet = Set(reps, value)
                 list.append(mySet)
             return list
         except Exception as e:
             print(f"Error creating Set from DataFrame: {e}")
             return []
 
-        
-    @property
-    def days(self) -> List[c.Day]:
-        days:List[c.Day] = []
-        h1blocks = self._seperateByHeader(self.markdown,"# ")
-        for b1 in h1blocks:
-            date_str = self._getFirstLine(b1,"# ")
-            try:
-                date = pandas.to_datetime(date_str).date()
-            except ValueError as e:
-                print(f"Error parsing date '{date_str}': {e}")
-                continue
-            h2blocks = self._seperateByHeader(b1.splitlines(),"## ")
-            workouts:List[c.Workout] = []
-            for b2 in h2blocks: 
-                exerciseTypeName = self._getFirstLine(b2,"## ")
-                mdSets = self._getMarkdownTable(b2)
-                dfSets = self._MarkdownToDataframe(mdSets)
-                sets = self._getSets(dfSets)
-                note = self._getNote(b2)
-                myWorkout: c.Workout = c.Workout(None,exerciseTypeName, sets, note)
-                workouts.append(myWorkout)
-            myDay = c.Day(None,date, workouts)
-            days.append(myDay)
-        return days
+    
+    markdown = _init(str(path))
+    days:List[Day] = []
+    h1blocks = _seperateByHeader(markdown,"# ")
+    for b1 in h1blocks:
+        date_str = _getFirstLine(b1,"# ")
+        try:
+            date = to_datetime(date_str).date()
+        except ValueError as e:
+            print(f"Error parsing date '{date_str}': {e}")
+            continue
+        h2blocks = _seperateByHeader(b1.splitlines(),"## ")
+        workouts:List[Workout] = []
+        for b2 in h2blocks: 
+            exerciseTypeName = _getFirstLine(b2,"## ")
+            mdSets = _getMarkdownTable(b2)
+            dfSets = _MarkdownToDataframe(mdSets)
+            sets = _getSets(dfSets)
+            note = _getNote(b2)
+            myWorkout: Workout = Workout(exerciseTypeName, sets, note)
+            workouts.append(myWorkout)
+        myDay = Day(date, workouts)
+        days.append(myDay)
+    return days
 
