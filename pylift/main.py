@@ -2,7 +2,7 @@ import argparse
 from pylift.input.markdown import read_markdown
 from pylift.classes.day import Day
 from pylift.classes.exercise_type import ExerciseType
-import Dashboard as ds
+import pylift.dashboard as ds
 from pylift.utils.dir import get_data_dir
 from pathlib import Path
 # my markdown: "/home/richard/Documents/Obsidian/Personal/03-Areas/Exercise.md"
@@ -22,8 +22,7 @@ def serve_dashboard(database_path:Path, host:str, port:int, debug:bool):
         print(" (Debug mode enabled)")
     ds.run_dashboard(str(database_path), host, port, debug)
 
-
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description="A tool to manage workout data.")
 
     # Create subparsers for distinct commands
@@ -51,3 +50,6 @@ if __name__ == "__main__":
         serve_dashboard(args.database, args.host, args.port, args.debug)
     else:
         parser.print_help()
+
+
+if __name__ == "__main__": main() 
