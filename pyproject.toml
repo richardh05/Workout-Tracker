@@ -15,6 +15,44 @@ pandas = "^2.2"
 [tool.poetry.scripts]
 pylift = "pylift.main:main"
 
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.12.2"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+src = ["pylift", "tests"]
+select = [
+  "F",    # pyflakes: correctness issues
+  "E",    # pycodestyle: style issues
+  "W",    # pycodestyle warnings
+  "I",    # isort: import sorting
+  "UP",   # pyupgrade: use modern syntax
+  "C90",  # mccabe: complexity checks
+]
+ignore = [
+  "E501"
+]
+line-length = 100
+target-version = "py310"
+exclude = [
+  ".git",
+  "__pycache__",
+  "build",
+  "dist",
+  ".venv"
+]
+respect-gitignore = true
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+indent-width = 2
+skip-magic-trailing-comma = false
+
+[tool.ruff.isort]
+known-first-party = ["pylift"]
+force-sort-within-sections = true
+lines-between-types = 0
