@@ -9,6 +9,7 @@
     "python.testing.pytestEnabled": false,
     "python.testing.unittestEnabled": true,
     "material-icon-theme.folders.associations": {
+        "pylift": "app",
         "input": "import",
         "output": "export"
   }

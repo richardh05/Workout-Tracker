@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "pylift"
+version = "0.0.1"
+description = "A Dash web app to analyze and visualize workout data"
+authors = ["Richard Hughes <57541025+richardh05@users.noreply.github.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{ include = "pylift" }]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+dash = "^2.0"
+pandas = "^2.2"
+
+[tool.poetry.scripts]
+pylift = "pylift.main:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
