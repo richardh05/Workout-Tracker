@@ -38,11 +38,11 @@ class DatabaseConnector:
         conn = self.connect()
         cursor = conn.cursor()
         try:
-            sql_query = f"SELECT Id, Name, Unit, Category FROM ExerciseType WHERE Name = ?"
+            sql_query = f"SELECT Name, Unit, Category FROM ExerciseType WHERE Name = ?"
             cursor.execute(sql_query, (name,))
             row = cursor.fetchone()
             if row:
-                result = c.ExerciseType(row[0],row[1],row[2],row[3])
+                result = c.ExerciseType(row[0],row[1],row[2])
                 return result
             else:
                 return None
@@ -54,12 +54,12 @@ class DatabaseConnector:
         conn = self.connect()
         cursor = conn.cursor()
         try:
-            cursor.execute("SELECT Id, Name, Unit, Category FROM ExerciseType")
+            cursor.execute("SELECT Name, Unit, Category FROM ExerciseType")
             rows = cursor.fetchall()
             # Create a dictionary keyed by ExerciseID
             result = {
-                id: c.ExerciseType(id, name, unit, category)
-                for id, name, unit, category in rows
+                id: c.ExerciseType(name, unit, category)
+                for name, unit, category in rows
             }
             return result
         except sqlite3.Error as e:
@@ -95,27 +95,6 @@ class DatabaseWriter(DatabaseConnector):
         except sqlite3.Error as e:
             print(f"Database error during {table} insertion: {e}")
             conn.rollback()        
-
-    def ExerciseTypeDialogue(self, exercise:str) -> c.ExerciseType:
-        print(f"It seems that '{exercise}' doesn't exist in your database. If you'd like to add it, hit enter. Otherwise, type anything else to rename it.")
-        user_input = input("> ").strip()
-        xName:str
-        if not user_input:  # User hit enter (empty string)
-            print(f"Adding '{exercise}' to the database.")
-            xName = exercise
-        else:
-            print(f"Renaming '{exercise}' to '{user_input}'.")
-            xName = user_input
-        xUnit:str = ""
-        while not xUnit:
-            print(f"Please enter a unit (Kg, Km, etc) that your exercise will be measured with. If this doesn't apply, enter 'N/A'.")
-            xUnit = input("> ").strip()
-        xCategory:str = ""
-        while not xCategory:
-            print(f"Finally, please specify the category (Push, Pull, Legs or Cardio).")
-            xCategory = input("> ").strip()
-        x = c.ExerciseType(None,xName,xUnit,xCategory)
-        return x
     
     def WriteExerciseTypeClass(self, x:c.ExerciseType):
         conn = self.connect()
@@ -140,9 +119,9 @@ class DatabaseWriter(DatabaseConnector):
         print(checkedExerciseType)
         print(w.exerciseType.name)
         if (checkedExerciseType == None):
-            checkedExerciseType = self.ExerciseTypeDialogue(w.exerciseType.name)
+            checkedExerciseType = ExerciseTypeDialogue(w.exerciseType.name)
             self.WriteExerciseTypeClass(checkedExerciseType)
-            checkedExerciseType.id = self.getIdByUnique("ExerciseType",dict (Name = checkedExerciseType.name))
+            checkedExerciseType.id = self.getIdByUnique("ExerciseType",dict (Name = checkedExerciseType.name)) 
         self._insert(conn, "Workout", "DayId,ExerciseTypeId,Note", (DayId,checkedExerciseType.id,w.note))
 
         w.id = self.getIdByUnique("Workout", dict(DayId=DayId, ExerciseTypeId=w.exerciseType.id, Note=w.note))
