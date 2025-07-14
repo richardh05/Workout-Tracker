@@ -44,7 +44,7 @@ class Day():
         with open(filepath, 'r') as f:
             data:dict = json.load(f)
         return cls.from_dict(data)
-    
+        
     def to_dataframe(self, types:List[ExerciseType]) -> DataFrame:
         data = []
         for workout in self.workouts:
@@ -61,6 +61,15 @@ class Day():
                 })
         return DataFrame(data)
     
+    @classmethod
+    def from_dataframe(cls, df: DataFrame) -> 'Day':
+        
+        unique_dates = df["Date"].unique().tolist()
+        for date in unique_dates:
+            filtered = df[df["Date"] == date]
+            if not filtered.empty:
+                process_rows(filtered)
+         
     @staticmethod
     def save(d: 'Day', l:List[ExerciseType], filepath: Path) -> None:
         def ensure_exercise_type_exists(d: Day, l: List[ExerciseType]) -> List[ExerciseType]:

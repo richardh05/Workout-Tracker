@@ -71,5 +71,5 @@ def run_dashboard(database_path:str, host:str, port:int , debug:bool):
                     labels={'Max1RM': 'Estimated 1RM (kg)'})
         fig.update_layout(xaxis_title="Date", yaxis_title="1RM (kg)")
         return fig
-    app.run(host=host, port=port, debug=debug)
+    app.run(host=host, port=str(port), debug=debug)
 
