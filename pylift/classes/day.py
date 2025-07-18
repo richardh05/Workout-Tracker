@@ -17,6 +17,14 @@ class Day:
     def __str__(self) -> str:
         return self.date_str
 
+    def __repr__(self):
+        return f"Day(date={self.date!r}, workouts={self.workouts!r})"
+
+    def __eq__(self, other):
+        if not isinstance(other, Day):
+            return NotImplemented
+        return self.date == other.date and self.workouts == other.workouts
+
     @property
     def date_str(self) -> str:
         return self.date.strftime("%Y-%m-%d")
@@ -85,7 +93,7 @@ class Day:
                 merged_data = merge_day(existing_data, data)
             else:
                 merged_data = data
-
+            filename.parent.mkdir(parents=True, exist_ok=True)
             with filename.open("w") as f:
                 json.dump(merged_data, f, indent=4)
 
