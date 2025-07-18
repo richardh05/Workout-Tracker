@@ -16,8 +16,79 @@ pandas = "^2.2"
 pylift = "pylift.main:main"
 
 [tool.poetry.group.dev.dependencies]
+ruff = "^0.12.2"
 pytest = "^8.4.1"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+src = ["pylift", "tests"]
+lint.select = [
+  "ERA",  # eradicate: commented-out code
+  "ANN",  # flake8-annotations: annotations for functions
+  "ASYNC",# flake8-async: ensure correct async
+  "S",    # flake8-bandit: security
+  "BLE",  # flake8-blind-except: specified exceptions only
+  "FBT",  # flake8-boolean-trap: no unclear booleans 
+  "B",    # flake8-bugbear: likely bugs
+  "A",    # flake8-builtins: shadowing standard library
+  "COM",  # flake8-commas: trailing commas
+  "C4",   # flake8-comprehensions: dict() -> {}
+  "T10",  # flake8-debugger: 
+  "EM",   # flake8-errmsg: common exception mistakes
+  "FA",   # flake8-future-annotations: 
+  "ISC",  # flake8-implicit-str-concat: clean string concats
+  "ICN",  # flake8-import-conventions: import sanitize
+  "LOG",  # flake8-logging
+  "G",    # flake8-logging-format
+  "INP",  # flake8-no-pep420: check for __init__.py
+  "PT",   # flake8-pytest-style: pytest styles good
+  "RSE",  # flake8-raise: 
+  "RET",  # flake8-return
+  "SLF",  # flake8-self: no private member access
+  "SIM",  # flake8-simplify
+  "ARG",  # flake8-unused-arguements
+  "PTH",  # flake8-use-pathlib
+  "FLY",  # flynt: fstrings > string joins
+  "I",    # isort: import sorting
+  "C90",  # mccabe: complexity checks
+  "PD",   # pandas-vet: 
+  "N",    # pep8-naming: naming conventions
+  "PERF", # Perflint: performance patters
+  "E",    # pycodestyle: style issues
+  "W",    # pycodestyle warnings
+ # "DOC",  # pydoclint: sync docs with actual parameters
+ # "D",    # pydocstyle: force docs
+  "F",    # pyflakes: correctness issues
+  "PL",   # pylint: general errors
+  "UP",   # pyupgrade: use modern syntax
+  "FURB", # refurb: make good code better
+  "RUF",  # ruff
+  "TRY",  # tryceratops: better trys
+]
+lint.ignore = [
+  "PD901",
+  "E501",
+]
+line-length = 100
+target-version = "py310"
+exclude = [
+  ".git",
+  "__pycache__",
+  "build",
+  "dist",
+  ".venv"
+]
+respect-gitignore = true
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+
+[tool.ruff.lint.isort]
+known-first-party = ["pylift"]
+force-sort-within-sections = true
+lines-between-types = 0
