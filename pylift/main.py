@@ -65,10 +65,15 @@ def main() -> None:
         help="Host address to bind the web server to. (default: 127.0.0.1)",
     )
     serve_parser.add_argument(
-        "--port", type=str, default=8000, help="Port number to listen on. (default: 8000)",
+        "--port",
+        type=str,
+        default=8000,
+        help="Port number to listen on. (default: 8000)",
     )
     serve_parser.add_argument(
-        "--debug", action="store_true", help="Enable debug mode for the web app.",
+        "--debug",
+        action="store_true",
+        help="Enable debug mode for the web app.",
     )
 
     args = parser.parse_args()

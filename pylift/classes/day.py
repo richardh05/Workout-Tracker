@@ -60,7 +60,8 @@ class Day:
     @staticmethod
     def save(d: "Day", exercises: list[ExerciseType], filepath: Path) -> None:
         def ensure_exercise_type_exists(
-            d: Day, exercises: list[ExerciseType],
+            d: Day,
+            exercises: list[ExerciseType],
         ) -> list[ExerciseType]:
             for w in d.workouts:
                 if not any(et.name == w.exercise_type for et in exercises):
