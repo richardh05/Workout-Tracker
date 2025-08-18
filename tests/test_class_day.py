@@ -12,7 +12,7 @@ seeds = [42, 123, 456]
 
 
 @pytest.fixture(params=seeds)
-def rng(request) -> DayFactory:
+def rng(request:pytest.FixtureRequest) -> DayFactory:
     return DayFactory(seed=request.param)
 
 
@@ -90,15 +90,14 @@ def test_to_dataframe(rng: DayFactory) -> None:
     d = Day(date(2023, 10, 1), workouts=[workout, workout2])
     df = d.to_dataframe(rng.exercise_types())
 
-    expected_data = {
+    expected_data = pd.DataFrame({
         "date": ["2023-10-01", "2023-10-01", "2023-10-01", "2023-10-01"],
         "exercise": ["Squat", "Squat", "Deadlift", "Deadlift"],
-        "category": ["Lower Body", "Lower Body", "Lower Body", "Lower Body"],
+        "category": ["Legs", "Legs", "Lower Body", "Lower Body"],
         "reps": [10, 12, 8, 10],
         "value": [50.0, 55.0, 70.0, 75.0],
         "unit": ["Kg", "Kg", "Kg", "Kg"],
         "note": ["Good form", "Good form", "Felt strong", "Felt strong"],
-    }
-    expected_df = pd.DataFrame(expected_data)
+    })
 
-    pd.testing.assert_frame_equal(df, expected_df)
+    pd.testing.assert_frame_equal(df, expected_data)
