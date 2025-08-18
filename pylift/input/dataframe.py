@@ -1,6 +1,11 @@
+from datetime import datetime, date
+from typing import cast
 import pandas as pd
 
+from pylift.classes.day import Day
 from pylift.classes.exercise_type import ExerciseType
+from pylift.classes.set import Set
+from pylift.classes.workout import Workout
 
 
 class ValueParseError(Exception):
@@ -90,3 +95,30 @@ def parse_inferred_unit(row: pd.Series, unit_aliases: dict[str, list[str]], exer
             return (value, default_unit)  # Return even if not in aliases
     msg = "No matching exercise type found"
     raise UnitParseError(msg)
+
+def workout_from_dataframe(df: pd.DataFrame) -> Workout:
+    exercise_type = df["Exercise"].iloc[0]
+    note = "; ".join(map(str, df["Notes"].dropna())) or None
+    sets = [
+        Set(value=v, reps=r) 
+        for v, r in zip(df["Value"], df["Reps"], strict=True)
+        ]    
+    return Workout(exercise_type=exercise_type, sets=sets, note=note)
+
+
+def days_from_dataframe(df: pd.DataFrame) -> list[Day]:
+    df["Date"] = pd.to_datetime(df["Date"])
+
+    days = []
+    for date_val, df_day in df.groupby("Date"):
+        ts = cast(pd.Timestamp, date_val)  # tell Pylance it's a Timestamp
+        date_clean: date = ts.date()
+        workouts = []
+
+        boundaries = df_day["Exercise"].ne(df_day["Exercise"].shift()).cumsum()
+        for _, df_ex in df_day.groupby(boundaries):
+            workouts.append(workout_from_dataframe(df_ex))
+
+        days.append(Day(date_clean, workouts))
+
+    return days

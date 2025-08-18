@@ -25,25 +25,4 @@ class Workout:
             sets=sets,
             note=data.get("note"),
         )
-    
-    @classmethod
-    def from_dataframe(cls, df:DataFrame) -> "Workout":
-        et = df["Excersise"].iloc[0]
-
-        # collapse notes into one string (skip NaN/None)
-        note_series = df["Notes"].dropna().astype(str)
-        note = "; ".join(note_series) if not note_series.empty else None
-        
-        # build Set objects row by row
-        sets = []
-        for _, row in df.iterrows():
-            sets.append(
-                Set(
-                    value=row["Value"],
-                    reps=row["Reps"]
-                )
-            )
-
-        return cls(exercise_type=et, sets=sets, note=note)
-        
         

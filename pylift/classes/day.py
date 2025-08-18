@@ -65,42 +65,6 @@ class Day:
         ]
         return DataFrame(data)
 
-    @classmethod
-    def _from_dataframe_single(cls, df: DataFrame) -> "Day":
-        """
-        Build a Day object from a dataframe that contains only a single date.
-        Splits the dataframe into sequential subsets by Exercise and passes each
-        subset into Workout.from_dataframe().
-        """
-        workouts = []
-        date = df["Date"].iloc[0]
-        # Track the start index of the current contiguous block
-        start_idx = 0
-        # Iterate row-by-row, checking when Exercise changes
-        for i in range(1, len(df)):
-            if df.iloc[i]["Exercise"] != df.iloc[i - 1]["Exercise"]:
-                subset = df.iloc[start_idx:i]
-                workouts.append(Workout.from_dataframe(subset))
-                start_idx = i
-        # Don't forget the final block
-        if len(df) > 0:
-            subset = df.iloc[start_idx:]
-            workouts.append(Workout.from_dataframe(subset))
-
-        # Assume Day takes a list of workouts (adapt to your __init__)
-        return cls(date, workouts)
-
-
-    @classmethod
-    def from_dataframe(cls, df: DataFrame) -> list["Day"]:
-        all_days = []
-        unique_dates = df["Date"].unique().tolist()
-        for date in unique_dates:
-            filtered = df[df["Date"] == date]
-            if not filtered.empty:
-                all_days.append(cls._from_dataframe_single(filtered))
-        return all_days
-
     @staticmethod
     def save(d: "Day", exercises: list[ExerciseType], filepath: Path) -> None:
         def ensure_exercise_type_exists(
