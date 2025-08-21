@@ -1,7 +1,6 @@
+from pylift.classes.workout import Workout
 from tests.factories.exercise_type_factory import ExerciseTypeFactory
 from tests.factories.set_factory import SetFactory
-
-from pylift.classes.workout import Workout
 
 
 class WorkoutFactory(SetFactory, ExerciseTypeFactory):

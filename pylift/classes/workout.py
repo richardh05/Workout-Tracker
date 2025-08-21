@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from pandas import DataFrame
 
 from pylift.classes.set import Set
 
@@ -25,4 +24,3 @@ class Workout:
             sets=sets,
             note=data.get("note"),
         )
-        

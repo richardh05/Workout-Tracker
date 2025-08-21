@@ -13,7 +13,7 @@ dash = "^2.0"
 pandas = "^2.2"
 
 [tool.poetry.scripts]
-pylift = "pylift.main:main"
+pylift = "pylift.__main__:main"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.12.2"
@@ -71,6 +71,7 @@ lint.select = [
 lint.ignore = [
   "PD901",
   "E501",
+  "S311",
 ]
 line-length = 100
 target-version = "py310"

@@ -25,6 +25,9 @@ class Day:
             return NotImplemented
         return self.date == other.date and self.workouts == other.workouts
 
+    def __hash__(self) -> int:
+        return hash((self.date, self.workouts))
+
     @property
     def date_str(self) -> str:
         return self.date.strftime("%Y-%m-%d")

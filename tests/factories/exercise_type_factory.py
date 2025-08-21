@@ -1,6 +1,5 @@
-from tests.factories.factory import Factory
-
 from pylift.classes.exercise_type import ExerciseType
+from tests.factories.factory import Factory
 
 
 class ExerciseTypeFactory(Factory):

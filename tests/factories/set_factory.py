@@ -1,6 +1,5 @@
-from tests.factories.factory import Factory
-
 from pylift.classes.set import Set
+from tests.factories.factory import Factory
 
 
 class SetFactory(Factory):

@@ -12,7 +12,7 @@ seeds = [42, 123, 456]
 
 
 @pytest.fixture(params=seeds)
-def rng(request:pytest.FixtureRequest) -> DayFactory:
+def rng(request: pytest.FixtureRequest) -> DayFactory:
     return DayFactory(seed=request.param)
 
 
@@ -21,8 +21,7 @@ def sample_date() -> date:
     return date(2023, 10, 1)
 
 
-@pytest.mark.parametrize("note", ["Felt Strong", "Not Bad"])
-def test_init(rng: DayFactory, note: str) -> None:
+def test_init(rng: DayFactory) -> None:
     date = rng.random_date()
     my_workouts = rng.random_workouts()
     day = Day(date, my_workouts)
@@ -52,7 +51,13 @@ def test_repr(rng: DayFactory) -> None:
         (True, False, False),  # 3. same date, different workouts → not equal
     ],
 )
-def test_eq(rng: DayFactory, sample_date: date, same_date: bool, same_workouts: bool, expected_equal: bool) -> None:
+def test_eq(
+    rng: DayFactory,
+    sample_date: date,
+    same_date: bool,
+    same_workouts: bool,
+    expected_equal: bool,
+) -> None:
     # build day1
     workouts1 = [Workout("Squat", [Set(10, 50.0)], "Note")]
     day1 = Day(sample_date, workouts1)
@@ -90,14 +95,16 @@ def test_to_dataframe(rng: DayFactory) -> None:
     d = Day(date(2023, 10, 1), workouts=[workout, workout2])
     df = d.to_dataframe(rng.exercise_types())
 
-    expected_data = pd.DataFrame({
-        "date": ["2023-10-01", "2023-10-01", "2023-10-01", "2023-10-01"],
-        "exercise": ["Squat", "Squat", "Deadlift", "Deadlift"],
-        "category": ["Legs", "Legs", "Lower Body", "Lower Body"],
-        "reps": [10, 12, 8, 10],
-        "value": [50.0, 55.0, 70.0, 75.0],
-        "unit": ["Kg", "Kg", "Kg", "Kg"],
-        "note": ["Good form", "Good form", "Felt strong", "Felt strong"],
-    })
+    expected_data = pd.DataFrame(
+        {
+            "date": ["2023-10-01", "2023-10-01", "2023-10-01", "2023-10-01"],
+            "exercise": ["Squat", "Squat", "Deadlift", "Deadlift"],
+            "category": ["Legs", "Legs", "Lower Body", "Lower Body"],
+            "reps": [10, 12, 8, 10],
+            "value": [50.0, 55.0, 70.0, 75.0],
+            "unit": ["Kg", "Kg", "Kg", "Kg"],
+            "note": ["Good form", "Good form", "Felt strong", "Felt strong"],
+        },
+    )
 
     pd.testing.assert_frame_equal(df, expected_data)

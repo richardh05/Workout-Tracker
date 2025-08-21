@@ -4,6 +4,11 @@
         "input": "import",
         "output": "export"
     },
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportGeneralTypeIssues": "error",
+        "reportOptionalSubscript": "error",
+        "reportOptionalMemberAccess": "error"
+    },
     "python.testing.pytestArgs": [
         "tests"
     ],
