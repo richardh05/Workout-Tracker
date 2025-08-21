@@ -58,7 +58,9 @@ def parse_value_unit_columns(row: pd.Series) -> tuple[float, str]:
 
 # TODO: Refactor this to  load the unit from the settings file
 def parse_inferred_unit(
-    row: pd.Series, unit_aliases: dict[str, list[str]], exercise_types: list[ExerciseType],
+    row: pd.Series,
+    unit_aliases: dict[str, list[str]],
+    exercise_types: list[ExerciseType],
 ) -> tuple[float, str]:
     """
     Parses the value from a pandas DataFrame row, inferring the unit as the ExerciseType's default unit.

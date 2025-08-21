@@ -21,7 +21,6 @@ def sample_date() -> date:
     return date(2023, 10, 1)
 
 
-@pytest.mark.parametrize("note", ["Felt Strong", "Not Bad"])
 def test_init(rng: DayFactory) -> None:
     date = rng.random_date()
     my_workouts = rng.random_workouts()
@@ -53,7 +52,11 @@ def test_repr(rng: DayFactory) -> None:
     ],
 )
 def test_eq(
-    rng: DayFactory, sample_date: date, same_date: bool, same_workouts: bool, expected_equal: bool,
+    rng: DayFactory,
+    sample_date: date,
+    same_date: bool,
+    same_workouts: bool,
+    expected_equal: bool,
 ) -> None:
     # build day1
     workouts1 = [Workout("Squat", [Set(10, 50.0)], "Note")]
