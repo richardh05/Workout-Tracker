@@ -1,11 +1,10 @@
 from datetime import date
 import textwrap
 
-from tests.factories.workout_factory import WorkoutFactory
-
 from pylift.classes.day import Day
 from pylift.classes.set import Set
 from pylift.classes.workout import Workout
+from tests.factories.workout_factory import WorkoutFactory
 
 
 class DayFactory(WorkoutFactory):
@@ -19,9 +18,7 @@ class DayFactory(WorkoutFactory):
 
     def random_markdown(self) -> tuple[str, list[Day]]:
         def random_workout_md(workout: Workout) -> str:
-            md = (
-                f"## {workout.exercise_type}\n{workout.note}\n\n| Value | Reps |\n| ----- | ---- |\n"
-            )
+            md = f"## {workout.exercise_type}\n{workout.note}\n\n| Value | Reps |\n| ----- | ---- |\n"
             sets_md = "\n".join(f"| {s.value} | {s.reps} |" for s in workout.sets)
             return f"{md}{sets_md}"
 
@@ -30,9 +27,9 @@ class DayFactory(WorkoutFactory):
             workouts_md = "\n".join(random_workout_md(w) for w in day.workouts)
             return f"# {date_str}\n{workouts_md}"
 
-        myDays = self.random_days()
-        print("\n".join(day_md(day) for day in myDays))
-        return "\n".join(day_md(day) for day in myDays), myDays
+        my_days = self.random_days()
+        print("\n".join(day_md(day) for day in my_days))
+        return "\n".join(day_md(day) for day in my_days), my_days
 
     def static_days(self) -> list[Day]:
         return [
@@ -61,7 +58,9 @@ class DayFactory(WorkoutFactory):
                 date=date(2025, 6, 27),
                 workouts=[
                     Workout(
-                        "Bench press", [Set(8, 17), Set(8, 17), Set(8, 22), Set(8, 22)], note="",
+                        "Bench press",
+                        [Set(8, 17), Set(8, 17), Set(8, 22), Set(8, 22)],
+                        note="",
                     ),
                 ],
             ),
@@ -71,14 +70,14 @@ class DayFactory(WorkoutFactory):
         return textwrap.dedent("""
       # 2025-04-17
       ## Overhead Press
-       
+
       | Value | Reps |
       | ----- | ---- |
       | 25    | 8    |
       | 31.5  | 8    |
       | 31.5  | 8    |
       ## Bench Press
-      
+
       | Value | Reps |
       | ----- | ---- |
       | 22    | 8    |
@@ -86,14 +85,14 @@ class DayFactory(WorkoutFactory):
       | 24.5  | 8    |
       # 2025-04-25
       ## Deadlift
-                           
+
       | Value | Reps |
       | ----- | ---- |
       | 12    | 10   |
       | 12    | 10   |
       # 2025-05-18
       ## Lateral Pulldown
-                           
+
       | Value | Reps |
       | ----- | ---- |
       | 25    | 12   |
@@ -102,7 +101,7 @@ class DayFactory(WorkoutFactory):
       | 31.5  | 8    |
       # 2025-06-27
       ## Bench press
-                           
+
       | Reps | Value |
       | ---- | ----- |
       | 8    | 17    |

@@ -16,6 +16,8 @@ def run_dashboard(database_path: Path, host: str, port: str, *, debug: bool) -> 
         port: The port number for the Dash app to listen on.
         debug: Whether to run the Dash app in debug mode.
     """
+
+    print(f"Running dashboard on {host}:{port} with database at {database_path}")
     # Replace this with your own data source or SQLite query
     data = {
         "Date": [

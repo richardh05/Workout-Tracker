@@ -19,10 +19,10 @@ def cases(seeds: list[int]) -> list[tuple[str, list[Day]]]:
     return comparisons
 
 
-@pytest.mark.parametrize("markdown, expected_days", cases(seeds))
-def test_read_markdown(markdown, expected_days, tmp_path: Path) -> None:
+@pytest.mark.parametrize(("markdown", "expected_days"), cases(seeds))
+def test_read_markdown(markdown: str, expected_days: list[Day], tmp_path: Path) -> None:
     # Write the markdown to a temporary file
-    with open(tmp_path / "test_markdown.md", "w", encoding="utf-8") as f:
+    with (tmp_path / "test_markdown.md").open("w", encoding="utf-8") as f:
         f.write(markdown)
 
     # Read the markdown file
