@@ -62,8 +62,8 @@ def _parse_markdown_table(md_table: str) -> list[Set]:
         try:
             sets: list[Set] = []
             for _index, row in df.iterrows():
-                reps = row["Reps"]
-                value = row["Value"]
+                reps = int(row["Reps"])
+                value = float(row["Value"])
                 my_set = Set(reps, value)
                 sets.append(my_set)
         except ParserError as e:

@@ -37,7 +37,7 @@ def parse_value_unit_columns(row: pd.Series) -> tuple[float, str]:
     """
     # Extract and validate the 'value'
     val = row["value"]
-    if val is None or pd.isna(val):
+    if pd.isna(val):
         msg = "Missing or null 'value' column."
         raise ValueParseError(msg)
 
@@ -78,7 +78,7 @@ def parse_inferred_unit(
     """
     # Check for 'value' field
     val = float(row["value"])
-    if val is None or pd.isna(val):
+    if pd.isna(val):
         msg = "Missing or null 'value' column."
         raise ValueParseError(msg)
 
@@ -90,7 +90,7 @@ def parse_inferred_unit(
         raise ValueParseError(msg) from e
 
     # Check for 'exercise' field to determine default unit
-    if "exercise" not in row or pd.isna(row["exercise"]):
+    if pd.isna(row["exercise"]):
         msg = "Missing or null 'exercise' column."
         raise ValueParseError(msg)
 
