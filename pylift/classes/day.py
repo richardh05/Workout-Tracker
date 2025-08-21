@@ -17,10 +17,10 @@ class Day:
     def __str__(self) -> str:
         return self.date_str
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Day(date={self.date!r}, workouts={self.workouts!r})"
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, Day):
             return NotImplemented
         return self.date == other.date and self.workouts == other.workouts
