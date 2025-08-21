@@ -11,11 +11,13 @@ from pylift.classes.workout import Workout
 
 class ValueParseError(Exception):
     """Raised when the value in a workout dataframe row cannot be parsed properly."""
+
     pass
 
 
 class UnitParseError(Exception):
     """Raised when the unit in a workout dataframe row cannot be parsed properly."""
+
     pass
 
 
@@ -85,7 +87,7 @@ def parse_inferred_unit(
         raise ValueParseError(msg) from e
 
     # Check for 'exercise' field to determine default unit
-    if pd.isna(row["exercise"]):
+    if "exercise" not in row.to_numpy():
         msg = "Missing or null 'exercise' column."
         raise ValueParseError(msg)
 
