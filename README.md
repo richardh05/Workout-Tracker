@@ -6,15 +6,15 @@
 - Display statistics via a web dashboard
 
 ## Installation
-
-### 1. Clone the repository:
-```bash
+```sh
+# 1. Clone the repository
 git clone https://github.com/richardh05/pylift.git
 cd pylift
 
-### 2. Install dependencies with Poetry
-```sh
+# 2. Install dependencies and make PyLift available as a CLI tool
 poetry install
+
+# 3. Activate the Poetry shell (optional, but recommended for development)
 poetry shell
 ```
 
@@ -24,7 +24,7 @@ PyLift provides two main commands: parse and serve.
 ### 1. Parse a Markdown file
 Use this command to read your workout logs from a Markdown file and store them in the database.
 ```sh
-python -m pylift parse /path/to/your/Exercise.md
+pylift parse /path/to/your/Exercise.md
 ```
 
 #### Options
@@ -34,7 +34,7 @@ python -m pylift parse /path/to/your/Exercise.md
 ### 2. Serve the Dashboard
 Use this command to view your workout statistics in a web interface.
 ```sh
-python -m pylift serve
+pylift serve
 ```
 
 #### Options
@@ -49,10 +49,10 @@ python -m pylift serve
 
 2. Parse it:
 ```sh
-python -m pylift parse ~/Documents/Obsidian/Personal/03-Areas/Exercise.md -v
+pylift parse ~/Documents/Obsidian/Personal/03-Areas/Exercise.md -v
 ```
 
 3. Launch the dashboard:
 ```sh
-python -m pylift serve
+pylift serve
 ```
