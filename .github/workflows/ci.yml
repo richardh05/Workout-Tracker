@@ -59,8 +59,8 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-interaction --no-root
 
-      - name: Install pyright (Pylance CLI)
-        run: npm install -g pyright
+      - name: Install pyright (if missing)
+        run: poetry add --group dev pyright || true
 
       - name: Run type checker
         run: poetry run pyright

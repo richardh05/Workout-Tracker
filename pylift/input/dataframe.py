@@ -11,13 +11,11 @@ from pylift.classes.workout import Workout
 
 class ValueParseError(Exception):
     """Raised when the value in a workout dataframe row cannot be parsed properly."""
-
     pass
 
 
 class UnitParseError(Exception):
     """Raised when the unit in a workout dataframe row cannot be parsed properly."""
-
     pass
 
 
@@ -36,19 +34,17 @@ def parse_value_unit_columns(row: pd.Series) -> tuple[float, str]:
         ValueUnitParseError: If the value is missing, not numeric, or the unit is unrecognized.
     """
     # Extract and validate the 'value'
-    val = row["value"]
-    if pd.isna(val):
+    if "value" not in row.to_numpy():
         msg = "Missing or null 'value' column."
         raise ValueParseError(msg)
-
     try:
-        num = float(val)
+        num = float(row["value"])
     except (TypeError, ValueError) as e:
         msg = f"Invalid numeric value: {row['value']}"
         raise ValueParseError(msg) from e
 
     # Extract and normalize the 'unit'
-    if "unit" not in row or pd.isna(row["unit"]):
+    if "unit" not in row.to_numpy():
         msg = "Missing or null 'unit' column."
         raise UnitParseError(msg)
 
@@ -77,14 +73,13 @@ def parse_inferred_unit(
     Returns:s missing, not numeric, or the unit is unrecognized.
     """
     # Check for 'value' field
-    val = float(row["value"])
-    if pd.isna(val):
+    if "value" not in row.to_numpy():
         msg = "Missing or null 'value' column."
         raise ValueParseError(msg)
 
     # Try to parse the value
     try:
-        num = float(val)
+        num = float(row["value"])
     except (TypeError, ValueError) as e:
         msg = f"Invalid numeric value: {row['value']}"
         raise ValueParseError(msg) from e
