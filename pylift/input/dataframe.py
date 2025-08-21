@@ -36,12 +36,13 @@ def parse_value_unit_columns(row: pd.Series) -> tuple[float, str]:
         ValueUnitParseError: If the value is missing, not numeric, or the unit is unrecognized.
     """
     # Extract and validate the 'value'
-    if "value" not in row or pd.isna(row["value"]):
+    val = row["value"]
+    if val is None or pd.isna(val):
         msg = "Missing or null 'value' column."
         raise ValueParseError(msg)
 
     try:
-        value = float(row["value"])
+        num = float(val)
     except (TypeError, ValueError) as e:
         msg = f"Invalid numeric value: {row['value']}"
         raise ValueParseError(msg) from e
@@ -53,7 +54,7 @@ def parse_value_unit_columns(row: pd.Series) -> tuple[float, str]:
 
     unit_raw = str(row["unit"]).strip().lower()
 
-    return value, unit_raw
+    return num, unit_raw
 
 
 # TODO: Refactor this to  load the unit from the settings file
@@ -76,13 +77,14 @@ def parse_inferred_unit(
     Returns:s missing, not numeric, or the unit is unrecognized.
     """
     # Check for 'value' field
-    if "value" not in row or pd.isna(row["value"]):
+    val = float(row["value"])
+    if val is None or pd.isna(val):
         msg = "Missing or null 'value' column."
         raise ValueParseError(msg)
 
     # Try to parse the value
     try:
-        value = float(row["value"])
+        num = float(val)
     except (TypeError, ValueError) as e:
         msg = f"Invalid numeric value: {row['value']}"
         raise ValueParseError(msg) from e
@@ -101,8 +103,8 @@ def parse_inferred_unit(
             # Normalize the unit if aliases exist
             for canonical, aliases in unit_aliases.items():
                 if default_unit == canonical or default_unit in aliases:
-                    return value, canonical
-            return (value, default_unit)  # Return even if not in aliases
+                    return num, canonical
+            return (num, default_unit)  # Return even if not in aliases
     msg = "No matching exercise type found"
     raise UnitParseError(msg)
 
